@@ -1,0 +1,11 @@
+{
+  "name": "fts-survey",
+  "version": "1.0.0",
+  "description": "Survey for FTS class",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+  },
+  "author": "Sam Ling",
+  "license": "ISC"
+}
