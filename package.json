@@ -4,8 +4,14 @@
   "description": "Survey for FTS class",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "node app.js"
   },
   "author": "Sam Ling",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "co": "^4.6.0",
+    "koa": "^1.1.2",
+    "koa-static": "^1.5.2",
+    "lodash": "^3.10.1"
+  }
 }
