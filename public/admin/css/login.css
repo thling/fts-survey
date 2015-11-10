@@ -1,0 +1,20 @@
+#contents {
+    margin-top: 50px;
+}
+
+#toast {
+    display: none;
+    width: 100%;
+    padding: 10px 20px;
+    background-color: rgba(255, 80, 80, 0.9);
+    color: white;
+    text-align: center;
+    position: fixed;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+}
+
+nav {
+    background-color: rgba(0, 0, 0, 0.8);
+}
