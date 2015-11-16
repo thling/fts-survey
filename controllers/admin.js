@@ -12,7 +12,25 @@ module.exports.render = function *() {
     if (!cookie || cookie !== process.env.API_KEY) {
         this.redirect('/admin/login');
     } else {
-        this.body = 'You are logged in!';
+        let questions = [
+            {
+                title: "Question 1",
+                description: "This is question 1 hahahahahhaqhahahaha"
+            },
+            {
+                title: "Question 2",
+                description: "This is question 2 LOLOLOLOLO9LLLLLOLLL"
+            },
+            {
+                title: "Question 3",
+                description: "This is question 3 AJIOWEFJWOAIFJIOAWEJF"
+            }
+        ];
+
+        yield this.render('admin/dash', {
+            questions: questions,
+            logo: 'Admin Dashboard'
+        });
     }
 }
 
@@ -25,7 +43,7 @@ module.exports.login = function *() {
     if (cookie && cookie === process.env.API_KEY) {
         this.redirect('/admin');
     } else {
-        yield this.render('admin/login');
+        yield this.render('admin/login', { logo: 'Admin Login' });
     }
 }
 

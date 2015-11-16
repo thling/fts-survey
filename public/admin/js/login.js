@@ -1,5 +1,8 @@
 $(document).ready(function () {
-    $('#login').click(function() {
+    $('#loginForm').on('submit', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
         // Set button as disabled to avoid double click
         $('#login').addClass('disabled');
 
@@ -11,8 +14,9 @@ $(document).ready(function () {
             password: password
         }, function (data) {
             // Process the redirect
-            window.location.replace(data.redirect);
+            window.location.assign(data.redirect);
         }).fail(function() {
+            console.log('failed');
             if ($('#toast').css('display') === 'none') {
                 // Prevent showing toast multiple times due to
                 // multiple clicks

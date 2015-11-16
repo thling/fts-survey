@@ -8,36 +8,29 @@
 </head>
 <body>
     <div id="toast"></div>
-    <div class="navbar-fixed">
-        <nav>
-            <div class="nav-wrapper">
-                <a href="#!" class="brand-logo center">Admin Login</a>
-                <ul class="right hide-on-med-and-down">
-                    <li><a href="/">Survey Home</a></li>
-                </ul>
-            </div>
-        </nav>
-    </div>
+    <%- include admin-navbar %>
 
     <div id="contents">
-        <div class="row">
-            <div class="col s10 offset-s1 m8 offset-m2 l4 offset-l4 input-field">
-                <input id="username" type="text" class="validate">
-                <label for="username">Username</label>
+        <form id="loginForm">
+            <div class="row">
+                <div class="col s10 offset-s1 m8 offset-m2 l4 offset-l4 input-field">
+                    <input id="username" type="text" class="validate">
+                    <label for="username">Username</label>
+                </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col s10 offset-s1 m8 offset-m2 l4 offset-l4 input-field">
-                <input id="password" type="password" class="validate">
-                <label for="password">Password</label>
+            <div class="row">
+                <div class="col s10 offset-s1 m8 offset-m2 l4 offset-l4 input-field">
+                    <input id="password" type="password" class="validate">
+                    <label for="password">Password</label>
+                </div>
             </div>
-        </div>
 
-        <div class="row">
-            <button class="btn waves-effect waves-light col s6 offset-s3 m2 offset-m8 l1 offset-l7" id="login">
-                Login
-            </button>
-        </div>
+            <div class="row">
+                <button class="btn waves-effect waves-light col s6 offset-s3 m2 offset-m8 l1 offset-l7" type="submit" id="login">
+                    Login
+                </button>
+            </div>
+        </form>
     </div>
 </body>
 </html>
