@@ -2,6 +2,7 @@
 
 let router = require('koa-router')();
 
+// This middleware handles exception
 router.use(function *(next) {
     try {
         yield next;

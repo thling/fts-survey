@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<title>Admin Dashboard</title>
+<head>
+    <%- include ../head.ejs %>
+    <link rel="stylesheet" href="/admin/css/dash.css"/>
+    <script type="text/javascript" src="/admin/js/dash.js"></script>
+</head>
+<body>
+    <div id="toast"></div>
+
+    <%- include admin-navbar %>
+
+    <div id="contents" class="row">
+        <div id="questionsList" class="container row">
+            <%- include questions-list %>
+        </div>
+
+        <%- include add-question %>
+        
+        <!-- Floating '+' button on the bottom right -->
+        <span id="action" class="col offset-l11 l1 offset-m10 m2 offset-s10 s1">
+            <a id="addQuestionTrigger" class="modal-trigger btn-floating btn-large waves-effect waves-light red" href="#addQuestionDialog">
+                <i id="addQuestion" class="material-icons">add</i>
+            </a>
+        </span>
+
+        <!-- Label for the floating '+' button -->
+        <span id="addQuestionLabel">
+            Add Question
+        </span>
+
+    </div>
+</body>
+</html>
