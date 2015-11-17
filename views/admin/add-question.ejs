@@ -1,0 +1,57 @@
+<!-- Modal Structure -->
+<div id="addQuestionDialog" class="modal">
+    <div class="modal-content row">
+        <h5>Add new question</h5>
+
+        <!-- Basic question properties -->
+        <div class="section">
+            <div class="row">
+                <div class="input-field col s12">
+                    <input id="questionTitle" type="text">
+                    <label for="questionTitle">Question Title</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s12">
+                    <textarea id="questionDescription" class="materialize-textarea"></textarea>
+                    <label for="questionDescription">Description of Question</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Answer type -->
+        <div class="section">
+            <!-- Type of answer, supports multiple choice or short answer -->
+            <div class="row">
+                <h6 class="col s12">Answer Type</h6>
+                <span class="col s12 m6 l4">
+                    <input class="with-gap" name="answerType" type="radio" id="multipleChoice" />
+                    <label for="multipleChoice">Multiple Choice</label>
+                </span>
+                <span class="col s12 m6 l4">
+                    <input class="with-gap" name="answerType" type="radio" id="shortAnswer" />
+                    <label for="shortAnswer">Short Answer</label>
+                </span>
+            </div>
+
+            <!-- If multiple choice answer is selected, provide spaces to specify -->
+            <div id="multipleChoiceAnswerList" class="section row">
+                <h6 class="col s12">Answer list for this multiple choice question</h6>
+                <div class="input-field col s12 mcChoices">
+                    <input id="mcChoice1" type="text">
+                    <label for="mcChoice1">Choice 1</label>
+                </div>
+                <!-- If more choices are needed -->
+                <a class="col waves-effect waves-gray btn-flat" id="addMoreChoice">
+                    Add more...
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- End action -->
+    <div class="modal-footer">
+        <a href="#!" id="saveButton" class="waves-effect waves-gray btn-flat"><b>SAVE</b></a>
+        <a href="#!" id="cancelButton" class="waves-effect waves-gray btn-flat">CANCEL</a>
+    </div>
+</div>

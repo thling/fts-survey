@@ -1,3 +1,5 @@
+@import 'add-question.css';
+
 #contents {
     margin-top: 50px;
 }
@@ -6,25 +8,43 @@ body {
     background-color: #eceff1;
 }
 
+.deleteQuestion {
+    padding: 7px 5px;
+    border-radius: 5px;
+}
+
+.deleteQuestionConfirm {
+    display: none;
+}
+
+.card .section {
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+}
+
 #toast {
     display: none;
     width: 100%;
-    padding: 10px 20px;
-    background-color: rgba(255, 80, 80, 0.9);
+    padding: 20px 20px;
+    background-color: rgb(255, 80, 80);
     color: white;
+    font-size: 1.3em;
     text-align: center;
-    position: fixed;
-    bottom: 0px;
+    position: absolute;
+    top: 0px;
     left: 0px;
     right: 0px;
+    box-shadow: 1px 0px 10px black;
+    z-index: 10000
 }
 
-/*nav {
-    background-color: rgba(0, 0, 0, 0.8);
-}*/
+.card.large .card-content, .card.medium .card-content, .card.small .card-content {
+    max-height: 100%;
+}
 
-.card {
-    height: 200px;
+.chip {
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
 #questionsList > .col {

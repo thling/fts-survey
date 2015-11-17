@@ -1,8 +1,8 @@
 'use strict';
 
 let render = require('koa-ejs');
-let crypto = require('crypto');
 let UserNotAuthorisedError = require('../lib/errors.js').UserNotAuthorisedError;
+let Question = require('../models/Question');
 
 /**
  * Redirects user if s/he has not logged in; otherwise, display dashboard.
@@ -12,20 +12,7 @@ module.exports.render = function *() {
     if (!cookie || cookie !== process.env.API_KEY) {
         this.redirect('/admin/login');
     } else {
-        let questions = [
-            {
-                title: "Question 1",
-                description: "This is question 1 hahahahahhaqhahahaha"
-            },
-            {
-                title: "Question 2",
-                description: "This is question 2 LOLOLOLOLO9LLLLLOLLL"
-            },
-            {
-                title: "Question 3",
-                description: "This is question 3 AJIOWEFJWOAIFJIOAWEJF"
-            }
-        ];
+        let questions = yield Question.find();
 
         yield this.render('admin/dash', {
             questions: questions,
@@ -63,4 +50,72 @@ module.exports.authenticate = function *() {
     this.body = {
         redirect: '/admin'
     };
+}
+
+/**
+ * Creates new questions and save it into database.
+ */
+module.exports.createQuestion = function *() {
+    let cookie = this.session.token;
+    if (!cookie || cookie !== process.env.API_KEY) {
+        throw new UserNotAuthorisedError("Unauthorised individual tries to access");
+    } else {
+        let data = this.request.body;
+        if (!data.title || data.title === '' || data.title.length === 0) {
+            this.status = 400;
+            this.body = {
+                message: 'Title cannot be empty.'
+            };
+        } else if (!data.description || data.description === ''
+                || data.description.length === 0) {
+            this.status = 400;
+            this.body = {
+                message: 'Description cannot be empty.'
+            };
+        } else if (data.answers && data.answers.length < 2) {
+            this.status = 400;
+            this.body = {
+                message: 'Multiple choice answers must have least 2 choices.'
+            };
+        } else {
+            if (!data.answers) {
+                data.answers = {};
+            }
+
+            let question = new Question(data);
+            try {
+                yield question.save();
+                this.status = 200;
+            } catch (err) {
+                console.error(err.message);
+                this.status = 500;
+            }
+        }
+    }
+}
+
+/**
+ * Deletes question from the database.
+ */
+module.exports.deleteQuestion = function *() {
+    let cookie = this.session.token;
+    if (!cookie || cookie !== process.env.API_KEY) {
+        throw new UserNotAuthorisedError("Unauthorised individual tries to access");
+    } else {
+        let data = this.request.body;
+        if (!data.id) {
+            this.status = 400;
+            this.body = {
+                message: 'ID not provided'
+            }
+        } else {
+            try {
+                yield Question.findOneAndRemove({ _id: data.id });
+                this.status = 200;
+            } catch (err) {
+                console.error(err.message);
+                this.status = 500;
+            }
+        }
+    }
 }

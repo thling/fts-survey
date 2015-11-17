@@ -16,7 +16,6 @@ $(document).ready(function () {
             // Process the redirect
             window.location.assign(data.redirect);
         }).fail(function() {
-            console.log('failed');
             if ($('#toast').css('display') === 'none') {
                 // Prevent showing toast multiple times due to
                 // multiple clicks

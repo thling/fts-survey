@@ -1,10 +1,40 @@
 <% questions.forEach(function (q) { %>
     <!-- Generate questions cards for each question -->
-    <div class="col l4 m6 s12">
+    <div class="col s12 m12 l12">
         <div class="card">
             <div class="card-content">
-                <span class="card-title"><%- q.title %></span>
-                <p><%- q.description %></p>
+                <span class="card-title light-blue-text text-darken-4">
+                    <%- q.title %>
+                </span>
+                <div class="divider"></div>
+
+                <div class="section">
+                    <h6 class="blue-grey-text"><b>Internal ID</b></h6>
+                    <p class="grey-text text-darken-2"><%- q._id %></p>
+                </div>
+
+                <div class="section">
+                    <h6 class="blue-grey-text"><b>Description</b></h6>
+                    <p class="grey-text text-darken-2"><%- q.description %></p>
+                </div>
+
+                <div class="section">
+                    <% if (!q.answers) { %>
+                        <h6 class="blue-grey-text"><b>Short Answers</b></h6>
+                        <div class="grey-text text-darken-2">Short texual answer provided by user</div>
+                    <% } else { %>
+                        <h6 class="blue-grey-text"><b>Multiple Choice</b></h6>
+                        <% for (var a of q.answers) { %>
+                            <div class="chip grey-text text-darken-2"><%- a %></div>
+                        <%}%>
+                    <% } %>
+                </div>
+            </div>
+            <div class="card-action">
+                <a class="deleteQuestion waves-effect waves-red red-text text-darken-3"
+                    objectId=<%- q._id %> >
+                    Delete Question
+                </a>
             </div>
         </div>
     </div>

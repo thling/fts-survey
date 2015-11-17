@@ -16,13 +16,11 @@
             <%- include questions-list %>
         </div>
 
-        <div id="addQuestionModal">
-            <%- include add-question %>
-        </div>
-
+        <%- include add-question %>
+        
         <!-- Floating '+' button on the bottom right -->
         <span id="action" class="col offset-l11 l1 offset-m10 m2 offset-s10 s1">
-            <a class="btn-floating btn-large waves-effect waves-light red">
+            <a id="addQuestionTrigger" class="modal-trigger btn-floating btn-large waves-effect waves-light red" href="#addQuestionDialog">
                 <i id="addQuestion" class="material-icons">add</i>
             </a>
         </span>
@@ -31,6 +29,7 @@
         <span id="addQuestionLabel">
             Add Question
         </span>
+
     </div>
 </body>
 </html>
