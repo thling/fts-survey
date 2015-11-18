@@ -17,5 +17,6 @@ router.use(function *(next) {
 });
 
 require('./admin')(router);
+require('./survey')(router);
 
 module.exports = router;
