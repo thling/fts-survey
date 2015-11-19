@@ -1,4 +1,4 @@
-var debug = true;
+var debug = false;
 
 /**
  * Display error message
@@ -15,6 +15,7 @@ var showToast = function (text) {
 $(document).ready(function () {
     $('body').fadeIn(300);
 
+    // Auto adjust the start button position on the landing page
     $(window).resize(function () {
         var winWidth = $(window).width();
         var winHeight = $(window).height();
@@ -34,6 +35,7 @@ $(document).ready(function () {
     });
 
     registerNextButtonClickHandler();
+    registerPrevButtonClickHandler();
 
     if (debug) {
         $("#startScreen").trigger('click');

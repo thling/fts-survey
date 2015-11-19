@@ -9,4 +9,5 @@ let SurveyController = require('../controllers/survey');
 module.exports = function (router) {
     router.get('/', SurveyController.render);
     router.get('/next', SurveyController.getNext);
+    router.get('/prev', SurveyController.getPrev);
 };
