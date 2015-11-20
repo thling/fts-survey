@@ -75,18 +75,6 @@ var disableForm = function () {
 };
 
 /**
- * Display error message
- */
-var showToast = function (text) {
-    if ($('#toast').css('display') === 'none') {
-        // Prevent showing toast multiple times due to
-        // multiple clicks
-        $('#toast').html(text);
-        $('#toast').fadeIn(300).delay(3000).fadeOut(300);
-    }
-};
-
-/**
  * Upload the data to server
  */
 var postQuestion = function (question, cb) {

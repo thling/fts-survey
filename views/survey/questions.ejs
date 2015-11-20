@@ -1,0 +1,18 @@
+<div>
+    <h3 id="sectionHeader" class="col s12 m12 l12 blue-grey-text">Survey Questions</h3>
+    <div id='questionList'>
+        <% for (var i in questions) {
+            var q = questions[i]; %>
+            <p><%= q.title %></p>
+            <p><%= q.description %></p>
+            <% if (q.answers) { %>
+                <ul>
+                    <% for (var a in q.answers) { %>
+                        <li><%= q.answers[a] %></li>
+                    <% } %>
+                </ul>
+            <% } %>
+            <div class="divider" style="margin: 20px 0px;"></div>
+        <% } %>
+    </div>
+</div>

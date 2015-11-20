@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<title>Start Survey</title>
+<head>
+    <%- include ../head.ejs %>
+    <link rel="stylesheet" href="/survey/css/layout.css"/>
+    <script type="text/javascript" src="/survey/js/switchPage.js"></script>
+    <script type="text/javascript" src="/survey/js/init.js"></script>
+</head>
+<body>
+    <div id="toast"></div>
+
+    <div id="startScreen" class="row waves-effect waves-yellow">
+        <span id="startPrompt">START</span>
+    </div>
+
+    <div class="row">
+        <div id="navpane" class="col blue-grey darken-3 white-text s12 m4 l3">
+            <% for (var s in sequences) {
+                var seq = sequences[s];
+                var htmlId = 'nav_' + seq.identifier;
+                var classes = 'navItem' + ((s == 0) ? ' selected' : ''); %>
+                <p index=<%= seq.index %> id="<%= htmlId %>" class="<%= classes %>"><%= seq.name %></p>
+            <% } %>
+        </div>
+
+        <div id="canvas" class="col blue-grey lighten-5 s12 m8 l9">
+            <div id="contents" class="section container row">
+            </div>
+
+            <div id="footer" class="row section container">
+                <div class="divider"></div>
+                <a id="prev" href="#!" class="navBtn btn-flat waves-effect
+                        waves-gray gray-text text-gray-darken-2
+                        col s3 offset-m6 m3 offset-l8 l2">
+                    Previous
+                </a>
+                <a id="next" href="#!" class="navBtn btn-flat waves-effect
+                        waves-teal teal-text text-teal-darken-2 col offset-s6 s3 m3 l2">
+                    Next
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
