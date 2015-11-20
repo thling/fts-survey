@@ -16,20 +16,16 @@
 
     <div class="row">
         <div id="navpane" class="col blue-grey darken-3 white-text s12 m4 l3">
-            <ul id="toc">
-                <li class="selected">Welcome</li>
-                <li>Consent Form</li>
-                <li>
-                    <ul>
-                        <li class='sub'>Test 1</li>
-                        <li class='sub '>Test 2</li>
-                    </ul>
-                </li>
-            </ul>
+            <% for (var s in sequences) {
+                var seq = sequences[s];
+                var htmlId = 'nav_' + seq.identifier;
+                var classes = 'navItem' + ((s == 0) ? ' selected' : ''); %>
+                <p index=<%= seq.index %> id="<%= htmlId %>" class="<%= classes %>"><%= seq.name %></p>
+            <% } %>
         </div>
+
         <div id="canvas" class="col blue-grey lighten-5 s12 m8 l9">
             <div id="contents" class="section container row">
-                <!-- <%- include welcome %> -->
             </div>
 
             <div id="footer" class="row section container">

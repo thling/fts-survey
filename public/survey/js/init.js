@@ -1,17 +1,5 @@
 var debug = false;
 
-/**
- * Display error message
- */
-var showToast = function (text) {
-    if ($('#toast').css('display') === 'none') {
-        // Prevent showing toast multiple times due to
-        // multiple clicks
-        $('#toast').html(text);
-        $('#toast').fadeIn(300).delay(3000).fadeOut(300);
-    }
-};
-
 $(document).ready(function () {
     $('body').fadeIn(300);
 
@@ -28,14 +16,29 @@ $(document).ready(function () {
 
     $(window).trigger('resize');
 
-    $('#startScreen').click(function () {
-        $(this).delay(50).fadeOut(200, function () {
+    // Register navigator
+    registerNextButtonClickHandler();
+    registerPrevButtonClickHandler();
+    registerNaviButtonClickHandler();
+
+    // Beautifying the bold start button
+    $('#startPrompt').click(function () {
+        $('#startScreen').delay(50).fadeOut(200, function () {
             $(this).remove();
         });
     });
 
-    registerNextButtonClickHandler();
-    registerPrevButtonClickHandler();
+    $('#startPrompt').hover(function () {
+        $(this).animate({
+            backgroundColor: 'yellow',
+            color: '#004d40'
+        }, 150);
+    }, function () {
+        $(this).animate({
+            backgroundColor: '#004d40',
+            color: 'yellow'
+        }, 150);
+    });
 
     if (debug) {
         $("#startScreen").trigger('click');
