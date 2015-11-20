@@ -85,7 +85,7 @@ var registerNextButtonClickHandler = function () {
 var registerPrevButtonClickHandler = function () {
     $('#prev').click(function () {
         var newIndex = parseInt($('.selected').attr('index')) - 1;
-        navigationAdapter('/next', switchSelected(newIndex))();
+        navigationAdapter('/prev', switchSelected(newIndex))();
     });
 };
 
