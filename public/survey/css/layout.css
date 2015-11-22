@@ -37,11 +37,12 @@ body {
 }
 
 .navItem {
+    opacity: 0;
     text-transform: uppercase;
-    font-size: 1.3em;
+    font-size: 1.5em;
     color: #9e9e9e;
     margin: 0px 0px 0px 5%;
-    padding: 5px;
+    padding: 8px;
     cursor: pointer;
 }
 
@@ -70,6 +71,10 @@ body {
 
 .descTest {
     font-size: 1.2em;
+}
+
+#questionList {
+    margin-top: 100px;
 }
 
 @media screen and (max-width: 600px) {

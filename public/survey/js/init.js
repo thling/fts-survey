@@ -26,6 +26,14 @@ $(document).ready(function () {
         $('#startScreen').delay(50).fadeOut(200, function () {
             $(this).remove();
         });
+
+        var navItems = document.getElementsByClassName('navItem');
+        for (var i = 0; i < navItems.length; i++) {
+            var item = $(navItems[i]);
+            item.delay(200 + (i + 1) * 100).animate({
+                opacity: 1
+            }, 800);
+        }
     });
 
     $('#startPrompt').hover(function () {
