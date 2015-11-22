@@ -16,7 +16,7 @@
     </div>
 
     <div class="row">
-        <div id="navpane" class="col blue-grey darken-3 white-text s12 m4 l3">
+        <div id="navpane" class="col blue-grey darken-3 white-text s12 m4 l3 row">
             <% for (var s in sequences) {
                 var seq = sequences[s];
                 var htmlId = 'nav_' + seq.identifier;
@@ -25,7 +25,7 @@
             <% } %>
         </div>
 
-        <div id="canvas" class="col blue-grey lighten-5 s12 m8 l9">
+        <div id="canvas" class="col blue-grey lighten-5 s12 offset-m4 m8 offset-l3 l9">
             <div id="contents" class="section container row">
             </div>
 
