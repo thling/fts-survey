@@ -29,7 +29,7 @@ var navigationAdapter = function (url, success, fail) {
                     $('#contents').fadeIn(300);
                     if (data.requiresConsent) {
                         $('#prev').html('Go back');
-                        $('#next').html('I Consent');
+                        $('#next').html('Consent');
                     } else {
                         $('#prev').html('Previous');
                         $('#next').html('Next');
