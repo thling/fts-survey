@@ -1,0 +1,25 @@
+.collapsible-header {
+    font-size: 1.3em;
+    padding: 5px 20px !important;
+}
+
+.collapsible-body {
+    background-color: white;
+    margin: 0px !important;
+    padding: 25px 0px 25px 0px;
+}
+
+.questionTitle {
+    margin-bottom: 15px !important;
+    color: #004d40;
+    font-size: 1.2em;
+    padding: 0px;
+}
+
+.questionAnswer {
+    font-size: 1.2em;
+}
+
+.radioLabel {
+    color: black;
+}

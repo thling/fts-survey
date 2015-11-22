@@ -75,7 +75,13 @@ var switchSelected = function (index) {
 };
 
 var registerNextButtonClickHandler = function () {
-    $('#startPrompt').click(navigationAdapter('/next'));
+    $('#startPrompt').click(function () {
+        if (!$(this).attr('disabled')) {
+            $(this).attr('disabled', 'true');
+            navigationAdapter('/next')();
+        }
+    });
+
     $('#next').click(function () {
         var newIndex = parseInt($('.selected').attr('index')) + 1;
         navigationAdapter('/next', switchSelected(newIndex))();
