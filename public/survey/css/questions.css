@@ -23,3 +23,12 @@
 .radioLabel {
     color: black;
 }
+
+#mousepaths {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0;
+}

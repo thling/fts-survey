@@ -9,7 +9,7 @@ $(document).ready(function () {
         var winHeight = $(window).height();
         var prompt = $('#startPrompt');
         prompt.css({
-            left: (winWidth - prompt.width()) / 2,
+            left: (winWidth - prompt.width()) / 2 - 10,
             top: (winHeight - prompt.height()) / 2
         });
     });

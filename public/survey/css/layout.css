@@ -1,6 +1,7 @@
 body {
     display: none;
     height: 100vh;
+    background-color: #eceff1;
 }
 
 .row {

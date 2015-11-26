@@ -4,7 +4,7 @@
     <ul class="collapsible popout" data-collapssible="accordion">
         <% for (var i in questions) {
             var q = questions[i]; %>
-            <li objectId="<%=q._id%>">
+            <li objectId="<%=q._id%>" class="questions">
                 <div class="collapsible-header"><%= q.title %></div>
                 <div class="collapsible-body questionBody row">
                     <p class="col offset-s1 s10 offset-m1 m10 offset-l1 l10 questionTitle section">
@@ -38,10 +38,16 @@
                 }, 300);
             }
 
+            cheaders.click(function () {
+                bindTracker($(this).parent());
+            });
+
             $('input[type=checkbox]').change(function (e) {
                 $('input[type=checkbox]').prop('checked', false);
                 $(this).prop('checked', true);
             });
+
+            bindTracker($(cheaders[0]));
         });
     </script>
 </div>
