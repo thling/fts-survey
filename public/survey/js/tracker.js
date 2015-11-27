@@ -3,13 +3,45 @@ var _current = undefined;
 // The graphics context of the current canvas
 var _ctx = undefined;
 
+var pushCoords = function (coords, len) {
+    if (coords.length === 0) {
+        return;
+    }
+
+    var toSend = coords.slice(0, len);
+
+    $.ajax({
+        url: '/coords',
+        type: 'PUT',
+        data: { coords: JSON.stringify(toSend) }
+    }).done(function (data) {
+        pushCoords(coords.slice(len), len);
+    }).fail(function() {
+        showToast('Unidentified error occured');
+    });
+};
+
 /**
  * Submits the tracker to the server
  *
  * @param   tracker     The object to save to database
  */
 var submitTracker = function (tracker) {
+    var chunkSize = 1000;
+    var origMouse = tracker.mouse;
+    console.log(origMouse.length);
+    var newMouse = origMouse.slice(0, chunkSize);
 
+    tracker.mouse = newMouse;
+    $.ajax({
+        url: '/records',
+        type: 'PUT',
+        data: { data: JSON.stringify(tracker) }
+    }).done(function (data) {
+        pushCoords(origMouse.slice(chunkSize), chunkSize);
+    }).fail(function () {
+        showToast('Unidentified error occured');
+    });
 };
 
 /**
@@ -40,7 +72,7 @@ var resetTracker = function (objectId, curAnswer) {
  * @param   newAnswer   The new answer to finalise this tracker with
  */
 var finaliseTracker = function (newAnswer) {
-    if (_current) {
+    if (_current && _current.questionId && newAnswer) {
         _current.answer.new = newAnswer;
         _current.endTime = (new Date()).getTime();
 
@@ -59,7 +91,7 @@ var finaliseTracker = function (newAnswer) {
  * @return  The answer provided to this element
  */
 var getAnswer = function (element) {
-    var ans;
+    var ans = '';
     var children = element.find('input');
     if (children && children.length > 1) {
         // Multiple choice type question
@@ -100,18 +132,24 @@ var createCanvas = function () {
         _ctx = undefined;
     });
 
-    // If ALT is pressed, show the mouse track
+    // If CTRL + ALT is pressed, show the mouse track
     $(window).keydown(function (e) {
-        if (e.keyCode === 18) {
+        this.ctrlKeyDown = this.ctrlKeyDown || (e.keyCode === 17);
+        this.altKeyDown = this.altKeyDown || (e.keyCode === 18);
+
+        if (this.ctrlKeyDown && this.altKeyDown) {
             $('#mousepaths').animate({
                 'opacity': '1'
             }, 150);
         }
     });
 
-    // If ALT is released, hide the mouse track
+    // If CTRL + ALT is released, hide the mouse track
     $(window).keyup(function (e) {
-        if (e.keyCode === 18) {
+        this.ctrlKeyDown = (e.keyCode === 17)? false : this.ctrlKeyDown;
+        this.altKeyDown = (e.keyCode === 18)? false : this.altKeyDown;
+
+        if (!this.ctrlKeyDown || !this.altKeyDown) {
             $('#mousepaths').animate({
                 'opacity': '0'
             }, 150);
@@ -138,10 +176,7 @@ var createCanvas = function () {
 
         if (_current) {
             // Add coordinates to tracked item
-            _current.mouse.push({
-                x: e.pageX,
-                y: e.pageY
-            });
+            _current.mouse.push([ e.pageX, e.pageY ]);
         }
     });
 }
@@ -170,7 +205,6 @@ var bindTracker = function (element) {
     // Wrap with jQuery
     var ele = $(element);
     if (_current) {
-        console.log(_current.questionId);
         finaliseTracker(getAnswer($('li[objectId=' + _current.questionId + ']')));
     }
 

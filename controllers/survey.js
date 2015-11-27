@@ -2,8 +2,10 @@
 
 let crypto = require('crypto');
 let render = require('koa-ejs');
+let Answer = require('../models/Answer');
 let Question = require('../models/Question');
-
+let utils = require('../lib/utils');
+let _ = require('lodash');
 // Sequence of our pages
 const SEQ = [
     {
@@ -29,6 +31,17 @@ const SEQ = [
 
 const CONSENT_INDEX = 2;
 
+const TRACKER_SCHEMA = {
+    questionId: '',
+    answer: {
+        old: '',
+        new: ''
+    },
+    startTime: '',
+    endTime: '',
+    mouse: []
+};
+
 /**
  * Check if the progress counter is valid.
  *
@@ -44,19 +57,68 @@ let isProgValid = function (prog) {
  * @param   ip  The IP address to hash
  */
 let getIpHash = function (ip) {
-    return crypto.createHash('sha256').update(ip || "secretkey").digest('hex');;
+    return crypto.createHash('sha1').update(ip || "secretkey").digest('hex');;
 };
+
+/**
+ * Gets an unique ID
+ */
+let getUniqueId = function () {
+    return crypto
+            .createHash('sha1')
+            .update(Date.now() + 'random_secret_string')
+            .digest('hex');
+}
 
 /**
  * Retrieves question list and caches them
  */
-let questions;
 let getQuestions = function *() {
-    if (!questions) {
-        questions = yield Question.find();
+    return yield Question.find();
+};
+
+let isReasonableTime = function (epoch) {
+    let cur = Date.now();
+    epoch = parseInt(epoch);
+    return (epoch < cur && epoch > cur - 5400000);
+}
+
+
+let validateTracker = function *(tracker) {
+    if (!utils.verifySchema(tracker, TRACKER_SCHEMA)) {
+        console.log('Invalid schema');
+        return false;
     }
 
-    return questions;
+    // Check if date is valid
+    if (!isReasonableTime(tracker.startTime) || !isReasonableTime(tracker.endTime)) {
+        console.log('Invalid date', tracker.startTime, tracker.endTime);
+        return false;
+    }
+
+    // Make sure the question exists
+    let question = yield Question.findOne({ _id: tracker.questionId });
+    if (!question) {
+        console.log('Question not exist');
+        return false;
+    }
+
+    // Make sure the answers are what we asked (if multiple choice)
+    if (question.answers) {
+        if (tracker.answer.new !== ''
+                && question.answers.indexOf(tracker.answer.new) === -1) {
+            console.log('New answer not good');
+            return false;
+        }
+
+        if (tracker.answer.old !== ''
+                &&  question.answers.indexOf(tracker.answer.old) === -1) {
+            console.log('Old answer not good');
+            return false;
+        }
+    }
+
+    return true;
 };
 
 /**
@@ -66,6 +128,7 @@ let getQuestions = function *() {
  */
 module.exports.render = function *() {
     this.session.progress = 0;
+
     yield this.render('survey/start', {
         sequences: SEQ.slice(1)
     });
@@ -85,6 +148,17 @@ module.exports.getPage = function *() {
                 message: 'You need to agree to the consent form be fore continuing!'
             };
         } else if (SEQ[index].identifier === 'questions') {
+            if (!this.session.sessionId) {
+                // Create new answer session and assign the session an ID
+                let ans = new Answer({
+                    consentId: this.session.consentId,
+                    trackers: []
+                });
+
+                yield ans.save();
+                this.session.sessionId = ans._id;
+            }
+
             let qs = yield getQuestions();
             this.session.progress = index;
             this.body = {
@@ -130,7 +204,18 @@ module.exports.getNext = function *() {
         this.session.consentId = getIpHash(this.request.ip);
         this.session.progress = nextProg;
 
-        // Since next is 'questions', have to render it
+        if (!this.session.sessionId) {
+            // Create new answer session and assign the session an ID
+            let ans = new Answer({
+                consentId: this.session.consentId,
+                trackers: []
+            });
+
+            yield ans.save();
+            this.session.sessionId = ans._id;
+        }
+
+        // Render the questions
         let qs = yield getQuestions();
         this.body = {
             ok: true,
@@ -184,5 +269,136 @@ module.exports.getPrev = function *() {
                 message: 'You are at the first page of the survey'
             };
         }
+    }
+};
+
+/**
+ * Add the submitted record to database
+ */
+module.exports.updateRecord = function *() {
+    if (this.session.consentId !== getIpHash(this.request.ip)) {
+        yield this.regenerateSession();
+        this.status = 200;
+        this.body = {
+            ok: false,
+            message: 'Please give consent to the consent form before proceeding'
+        };
+
+        return;
+    }
+
+    // Verify we have everything good
+    let data = JSON.parse(this.request.body.data);
+
+    if (!(yield validateTracker(data))) {
+        this.status = 200;
+        this.body = {
+            ok: false,
+            message: 'The tracking schemas do not match'
+        };
+
+        return;
+    }
+
+    let id = this.session.sessionId;
+    if (id) {
+        let ans = yield Answer.findOne({ _id: id });
+        if (!ans) {
+            yield this.regenerateSession();
+            this.status = 200;
+            this.body = {
+                ok: false,
+                message: 'Cannot find the session ID; make sure cookies are enable'
+            };
+
+            return;
+        }
+
+        if (!ans.trackers) {
+            ans.trackers = [];
+        }
+
+        ans.trackers.push(data);
+        try {
+            yield ans.save();
+            this.status = 204;
+        } catch (error) {
+            console.error(error.message);
+            this.status = 500;
+        }
+    } else {
+        yield this.regenerateSession();
+        this.status = 200;
+        this.body = {
+            ok: false,
+            message: 'Cannot find the session ID; make sure cookies are enabled'
+        };
+    }
+};
+
+module.exports.pushCoords = function *() {
+    if (this.session.consentId !== getIpHash(this.request.ip)) {
+        yield this.regenerateSession();
+        this.status = 200;
+        this.body = {
+            ok: false,
+            message: 'Please give consent to the consent form before proceeding'
+        };
+
+        return;
+    }
+
+    let data = JSON.parse(this.request.body.coords);
+
+    if (!data) {
+        this.status = 400;
+        this.body = {
+            ok: false,
+            message: 'Received no payloads'
+        };
+
+        return;
+    }
+
+    let id = this.session.sessionId;
+    if (id) {
+        let ans = yield Answer.findOne({ _id: id });
+        if (!ans) {
+            yield this.regenerateSession();
+            this.status = 200;
+            this.body = {
+                ok: false,
+                message: 'Cannot find the session ID; make sure cookies are enable'
+            };
+
+            return;
+        }
+
+        if (!ans.trackers) {
+            ans.trackers = [];
+        }
+
+        console.log(_.omit(ans.trackers[ans.trackers.length - 1], 'mouse'));
+        let mouseData = ans.trackers[ans.trackers.length - 1].mouse;
+        console.log('Orig length: ' + mouseData.length);
+        Array.prototype.push.apply(mouseData, data);
+        console.log('New length: ' + mouseData.length);
+
+        ans.trackers[ans.trackers.length - 1].mouse = mouseData;
+        try {
+            yield ans.save();
+            console.log('Mouse length', ans.trackers[ans.trackers.length - 1].mouse.length);
+            this.status = 204;
+        } catch (error) {
+            console.error(error.message);
+            this.status = 500;
+        }
+    } else {
+        yield this.regenerateSession();
+        this.status = 400;
+        this.body = {
+            ok: false,
+            message: 'Cannot find the session ID; make sure cookies are enabled'
+        };
     }
 };

@@ -11,4 +11,6 @@ module.exports = function (router) {
     router.get('/page/:index', SurveyController.getPage);
     router.get('/next', SurveyController.getNext);
     router.get('/prev', SurveyController.getPrev);
+    router.put('/records', SurveyController.updateRecord);
+    router.put('/coords', SurveyController.pushCoords);
 };
