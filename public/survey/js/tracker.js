@@ -2,8 +2,29 @@
 var _current = undefined;
 // The graphics context of the current canvas
 var _ctx = undefined;
+// The number of coordinates each submission should be
+var _chunkSize = 1000;
 
-var pushCoords = function (coords, len) {
+/**
+ * Handler for failed ajax requests
+ *
+ * @param   xhr     Response body
+ * @param   status  Text description of fail status (e.g. 'error' or 'timeout')
+ * @param   error   The error string indicated by HTTP code
+ */
+var failHandler = function(xhr, status, error) {
+    showToast(xhr.responseText);
+};
+
+/**
+ * Upload coordinates in batch
+ *
+ * @param   coords          The remaining coordinates to upload
+ * @param   len             Number of items to upload from coords
+ * @param   trackerIndex    The index of the tracker in database for this
+ *                          particular tracker
+ */
+var pushCoords = function (coords, len, trackerIndex) {
     if (coords.length === 0) {
         return;
     }
@@ -11,14 +32,14 @@ var pushCoords = function (coords, len) {
     var toSend = coords.slice(0, len);
 
     $.ajax({
-        url: '/coords',
+        url: '/coords/' + trackerIndex,
         type: 'PUT',
         data: { coords: JSON.stringify(toSend) }
     }).done(function (data) {
-        pushCoords(coords.slice(len), len);
-    }).fail(function() {
-        showToast('Unidentified error occured');
-    });
+        // Recursively call the function in callback to simulate
+        // synchronous upload
+        pushCoords(coords.slice(len), len, trackerIndex);
+    }).fail(failHandler);
 };
 
 /**
@@ -27,10 +48,8 @@ var pushCoords = function (coords, len) {
  * @param   tracker     The object to save to database
  */
 var submitTracker = function (tracker) {
-    var chunkSize = 1000;
     var origMouse = tracker.mouse;
-    console.log(origMouse.length);
-    var newMouse = origMouse.slice(0, chunkSize);
+    var newMouse = origMouse.slice(0, _chunkSize);
 
     tracker.mouse = newMouse;
     $.ajax({
@@ -38,10 +57,8 @@ var submitTracker = function (tracker) {
         type: 'PUT',
         data: { data: JSON.stringify(tracker) }
     }).done(function (data) {
-        pushCoords(origMouse.slice(chunkSize), chunkSize);
-    }).fail(function () {
-        showToast('Unidentified error occured');
-    });
+        pushCoords(origMouse.slice(_chunkSize), _chunkSize, data.trackerIndex);
+    }).fail(failHandler);
 };
 
 /**

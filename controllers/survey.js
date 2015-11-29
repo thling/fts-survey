@@ -6,6 +6,7 @@ let Answer = require('../models/Answer');
 let Question = require('../models/Question');
 let utils = require('../lib/utils');
 let _ = require('lodash');
+
 // Sequence of our pages
 const SEQ = [
     {
@@ -26,6 +27,11 @@ const SEQ = [
         identifier: 'questions',
         name: 'Questions',
         index: 3
+    }, {
+        template: 'final',
+        identifier: 'final',
+        name: 'Complete',
+        index: 4
     }
 ];
 
@@ -77,13 +83,25 @@ let getQuestions = function *() {
     return yield Question.find();
 };
 
+/**
+ * Checks if the time is valid. The criterias are:
+ *    1. Time is in the past
+ *    2. Time is no earlier than 1.5 hours ago
+ *
+ * @param   epoch   The epoch time to check
+ */
 let isReasonableTime = function (epoch) {
     let cur = Date.now();
     epoch = parseInt(epoch);
     return (epoch < cur && epoch > cur - 5400000);
 }
 
-
+/**
+ * Check if the tracker is valid and conforms to
+ * the data format
+ *
+ * @param   tracker The tracker to validate
+ */
 let validateTracker = function *(tracker) {
     if (!utils.verifySchema(tracker, TRACKER_SCHEMA)) {
         console.log('Invalid schema');
@@ -141,6 +159,12 @@ module.exports.getPage = function *() {
     let index = parseInt(this.params.index);
 
     if (isProgValid(index)) {
+        if (index === this.session.progress) {
+            // Don't render anything if attempting to access the same page
+            this.status = 200;
+            return;
+        }
+
         if (index > CONSENT_INDEX && (!this.session.consentId ||
                 this.session.consentId !== getIpHash(this.request.ip))) {
             this.body = {
@@ -164,7 +188,12 @@ module.exports.getPage = function *() {
             this.body = {
                 ok: true,
                 contents: yield this.render('survey/' + SEQ[index].template, { writeResp: false, questions: qs }),
-                requiresConsent: (index === CONSENT_INDEX) ? true: false
+                actionButtons: [ 'Submit', 'Previous' ]
+            };
+        } else if (SEQ[index].identifier === 'final') {
+            this.body = {
+                ok: false,
+                message: 'Please submit your survey'
             };
         } else {
             // If everything is good then render
@@ -172,7 +201,6 @@ module.exports.getPage = function *() {
             this.body = {
                 ok: true,
                 contents: yield this.render('survey/' + SEQ[index].template, { writeResp: false }),
-                requiresConsent: (index === CONSENT_INDEX) ? true: false
             };
         }
     } else {
@@ -222,7 +250,7 @@ module.exports.getNext = function *() {
             // Note: use option { writeResp: false } to tell
             // renderer to return the html, not set it in body
             contents: yield this.render('survey/' + SEQ[nextProg].template, { writeResp: false, questions: qs }),
-            requiresConsent: (nextProg === CONSENT_INDEX) ? true: false
+            actionButtons: [ 'Submit', 'Previous' ]
         };
     } else if (nextProg > CONSENT_INDEX && (!this.session.consentId ||
             this.session.consentId !== getIpHash(this.request.ip))) {
@@ -230,13 +258,21 @@ module.exports.getNext = function *() {
         // some bad thing has happened. Redirect to first page
         yield this.regenerateSession();
         this.status = 400;
+    } else if (SEQ[nextProg].identifier === 'final') {
+        yield this.regenerateSession();
+        this.body = {
+            ok: true,
+            contents: yield this.render('survey/' + SEQ[nextProg].template, { writeResp: false }),
+            actionButtons: false,
+            end: true
+        };
     } else {
         // Valid prog and has proper authorisation
         this.session.progress = nextProg;
         this.body = {
             ok: true,
             contents: yield this.render('survey/' + SEQ[nextProg].template, { writeResp: false }),
-            requiresConsent: (nextProg === CONSENT_INDEX) ? true: false
+            actionButtons: (nextProg === CONSENT_INDEX)? [ 'Consent', 'Go Back' ] : undefined
         };
     }
 };
@@ -259,7 +295,7 @@ module.exports.getPrev = function *() {
             this.body = {
                 ok: true,
                 contents: yield this.render('survey/' + SEQ[prevProg].template, { writeResp: false }),
-                requiresConsent: (prevProg === CONSENT_INDEX) ? true: false
+                actionButtons: (prevProg === CONSENT_INDEX)? [ 'Consent', 'Go Back' ] : undefined
             };
         } else {
             // If prevProg is 0, we don't want to go further back
@@ -278,12 +314,8 @@ module.exports.getPrev = function *() {
 module.exports.updateRecord = function *() {
     if (this.session.consentId !== getIpHash(this.request.ip)) {
         yield this.regenerateSession();
-        this.status = 200;
-        this.body = {
-            ok: false,
-            message: 'Please give consent to the consent form before proceeding'
-        };
-
+        this.status = 400;
+        this.body = 'Please give consent to the consent form before proceeding';
         return;
     }
 
@@ -291,26 +323,19 @@ module.exports.updateRecord = function *() {
     let data = JSON.parse(this.request.body.data);
 
     if (!(yield validateTracker(data))) {
-        this.status = 200;
-        this.body = {
-            ok: false,
-            message: 'The tracking schemas do not match'
-        };
-
+        this.status = 400;
+        this.body = 'Invalid data format';
         return;
     }
 
+    // Retrieve session id
     let id = this.session.sessionId;
     if (id) {
         let ans = yield Answer.findOne({ _id: id });
         if (!ans) {
             yield this.regenerateSession();
-            this.status = 200;
-            this.body = {
-                ok: false,
-                message: 'Cannot find the session ID; make sure cookies are enable'
-            };
-
+            this.status = 400;
+            this.body = 'Cannot find the session ID; make sure cookies are enable';
             return;
         }
 
@@ -321,84 +346,91 @@ module.exports.updateRecord = function *() {
         ans.trackers.push(data);
         try {
             yield ans.save();
-            this.status = 204;
+
+            // If everything goes well, we return with index of the tracker
+            // in case more coordinates should be pushed
+            let trackerIndex = ans.trackers.length - 1;
+            this.status = 200;
+            this.body = {
+                trackerIndex: trackerIndex
+            };
         } catch (error) {
             console.error(error.message);
             this.status = 500;
         }
     } else {
         yield this.regenerateSession();
-        this.status = 200;
-        this.body = {
-            ok: false,
-            message: 'Cannot find the session ID; make sure cookies are enabled'
-        };
+        this.status = 400;
+        this.body = 'Cannot find the session ID; make sure cookies are enabled';
     }
 };
 
+/**
+ * Method for splitting mouse coordinate upload into separate batches
+ * to avoid payload overlimit problem for HTTP requests.
+ */
 module.exports.pushCoords = function *() {
+    // Check if session is valid
     if (this.session.consentId !== getIpHash(this.request.ip)) {
         yield this.regenerateSession();
-        this.status = 200;
-        this.body = {
-            ok: false,
-            message: 'Please give consent to the consent form before proceeding'
-        };
-
+        this.status = 400;
+        this.body = 'Cannot find the session ID; make sure cookies are enabled';
         return;
     }
+
+    // Check if data exists
+    if (!this.request.body.coords) {
+        this.status = 400;
+        this.body = 'Received no payloads along request';
+        return;
+    }
+
+    // Check if tracker index is provided
+    let trackerIndex = this.params.index;
+    if (!trackerIndex) {
+        this.status = 400;
+        this.body = 'No tracker index was provided';
+        return;
+    }
+
+    trackerIndex = parseInt(trackerIndex);
 
     let data = JSON.parse(this.request.body.coords);
-
-    if (!data) {
-        this.status = 400;
-        this.body = {
-            ok: false,
-            message: 'Received no payloads'
-        };
-
-        return;
-    }
-
     let id = this.session.sessionId;
+
     if (id) {
         let ans = yield Answer.findOne({ _id: id });
         if (!ans) {
+            // If answer does not exist
             yield this.regenerateSession();
-            this.status = 200;
-            this.body = {
-                ok: false,
-                message: 'Cannot find the session ID; make sure cookies are enable'
-            };
-
+            this.status = 400;
+            this.body = 'Invalid session ID provided';
             return;
         }
 
-        if (!ans.trackers) {
-            ans.trackers = [];
+        // Validate tracker index
+        if (!ans.trackers || ans.trackers.length < trackerIndex + 1) {
+            yield this.regenerateSession();
+            this.status = 400;
+            this.body = 'Invalid session ID or tracker index (' + ans.trackers.length + ' : ' + (trackerIndex + 1) + ')';
+            return;
         }
 
-        console.log(_.omit(ans.trackers[ans.trackers.length - 1], 'mouse'));
-        let mouseData = ans.trackers[ans.trackers.length - 1].mouse;
-        console.log('Orig length: ' + mouseData.length);
+        // Extend the mouse coordinate of the tracker
+        let mouseData = ans.trackers[trackerIndex].mouse;
         Array.prototype.push.apply(mouseData, data);
-        console.log('New length: ' + mouseData.length);
+        ans.trackers[trackerIndex].mouse = mouseData;
+        ans.markModified('trackers');
 
-        ans.trackers[ans.trackers.length - 1].mouse = mouseData;
         try {
             yield ans.save();
-            console.log('Mouse length', ans.trackers[ans.trackers.length - 1].mouse.length);
             this.status = 204;
         } catch (error) {
-            console.error(error.message);
             this.status = 500;
         }
     } else {
         yield this.regenerateSession();
         this.status = 400;
-        this.body = {
-            ok: false,
-            message: 'Cannot find the session ID; make sure cookies are enabled'
-        };
+        this.body = 'Cannot find the session ID; make sure cookies are enabled';
     }
 };

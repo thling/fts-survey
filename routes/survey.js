@@ -12,5 +12,5 @@ module.exports = function (router) {
     router.get('/next', SurveyController.getNext);
     router.get('/prev', SurveyController.getPrev);
     router.put('/records', SurveyController.updateRecord);
-    router.put('/coords', SurveyController.pushCoords);
+    router.put('/coords/:index', SurveyController.pushCoords);
 };

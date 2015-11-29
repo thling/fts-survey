@@ -27,16 +27,40 @@ var navigationAdapter = function (url, success, fail) {
                     $('#contents').empty();
                     $('#contents').append(data.contents);
                     $('#contents').fadeIn(300);
-                    if (data.requiresConsent) {
+                    if (data.actionButtons === undefined) {
+                        $('#prev').css('display', 'default');
+                        $('#next').css('display', 'default');
+                        $('#footerDivider').css('display', 'default');
+                        $('#prev').html('Previous');
+                        $('#next').html('Next');
+                    } else if (data.actionButtons === false){
+                        $('#prev').css('display', 'none');
+                        $('#next').css('display', 'none');
+                        $('#footerDivider').css('display', 'none');
                         $('#prev').html('Go back');
                         $('#next').html('Consent');
                     } else {
-                        $('#prev').html('Previous');
-                        $('#next').html('Next');
+                        $('#prev').css('display', 'default');
+                        $('#next').css('display', 'default');
+                        $('#footerDivider').css('display', 'default');
+                        $('#prev').html(data.actionButtons[1]);
+                        $('#next').html(data.actionButtons[0]);
                     }
+
                     $('#footer').fadeIn(300);
                     if (success !== undefined) {
                         success();
+                    }
+
+                    // End of study
+                    if (data.end) {
+                        console.log('ending stuffs');
+                        var navItems = $('.navItem');
+                        for (var i = 0; i < navItems.length - 1; i++) {
+                            $(navItems[i]).delay(i * 30 + 350).slideUp(300, function () {
+                                $(this).remove();
+                            });
+                        }
                     }
                 });
             } else {
