@@ -9,7 +9,7 @@ $(document).ready(function () {
         var winHeight = $(window).height();
         var prompt = $('#startPrompt');
         prompt.css({
-            left: (winWidth - prompt.width()) / 2,
+            left: (winWidth - prompt.width()) / 2 - 10,
             top: (winHeight - prompt.height()) / 2
         });
     });
@@ -30,9 +30,9 @@ $(document).ready(function () {
         var navItems = document.getElementsByClassName('navItem');
         for (var i = 0; i < navItems.length; i++) {
             var item = $(navItems[i]);
-            item.delay(200 + (i + 1) * 100).animate({
+            item.delay(200 + (i + 1) * 150).animate({
                 opacity: 1
-            }, 800);
+            }, 600);
         }
     });
 

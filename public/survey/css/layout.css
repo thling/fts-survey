@@ -1,6 +1,7 @@
 body {
     display: none;
     height: 100vh;
+    background-color: #eceff1;
 }
 
 .row {
@@ -71,7 +72,20 @@ body {
 }
 
 .descTest {
-    font-size: 1.2em;
+    font-size: 1.1em;
+}
+
+ol {
+    list-style-type: disc;
+}
+
+.divider {
+    margin: 40px 0px;
+}
+
+h4 {
+    color: #607d8b;
+    font-size: 1.3em;
 }
 
 #questionList {
