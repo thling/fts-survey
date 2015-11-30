@@ -58,12 +58,12 @@ let isProgValid = function (prog) {
 }
 
 /**
- * Hash the IP. Used for consent form ID (probably need something better).
+ * Hash an object.
  *
- * @param   ip  The IP address to hash
+ * @param   item    The item to hash
  */
-let getIpHash = function (ip) {
-    return crypto.createHash('sha1').update(ip || "secretkey").digest('hex');;
+let getSha1Hash = function (item) {
+    return crypto.createHash('sha1').update(item + 'SecretKey').digest('hex');;
 };
 
 /**
@@ -167,7 +167,7 @@ module.exports.getPage = function *() {
         }
 
         if (index > CONSENT_INDEX && (!this.session.consentId ||
-                this.session.consentId !== getIpHash(this.request.ip))) {
+                this.session.consentId !== getSha1Hash(this.session.sessionId))) {
             this.body = {
                 ok: false,
                 message: 'You need to agree to the consent form be fore continuing!'
@@ -230,19 +230,24 @@ module.exports.getNext = function *() {
         }
     } else if (prog === CONSENT_INDEX) {
         // Sets the consent cookie
-        this.session.consentId = getIpHash(this.request.ip);
         this.session.progress = nextProg;
 
         if (!this.session.sessionId) {
             // Create new answer session and assign the session an ID
             let ans = new Answer({
-                consentId: this.session.consentId,
                 trackers: []
             });
 
             yield ans.save();
             this.session.sessionId = ans._id;
         }
+
+        // Get a consentId
+        this.session.consentId = getSha1Hash(this.session.sessionId);
+        let ans = yield Answer.findOne({ _id: this.session.sessionId });
+        ans.consentId = this.session.consentId;
+        ans.markModified('consentId');
+        yield ans.save();
 
         // Render the questions
         let qs = yield getQuestions();
@@ -254,7 +259,7 @@ module.exports.getNext = function *() {
             actionButtons: [ 'Submit', 'Previous' ]
         };
     } else if (nextProg > CONSENT_INDEX && (!this.session.consentId ||
-            this.session.consentId !== getIpHash(this.request.ip))) {
+            this.session.consentId !== getSha1Hash(this.session.sessionId))) {
         // If consentId is not set and prog is already past consent form,
         // some bad thing has happened. Redirect to first page
         yield this.regenerateSession();
@@ -312,7 +317,7 @@ module.exports.getPrev = function *() {
  * Add the submitted record to database
  */
 module.exports.updateRecord = function *() {
-    if (this.session.consentId !== getIpHash(this.request.ip)) {
+    if (this.session.consentId !== getSha1Hash(this.session.sessionId)) {
         console.log(this.session);
         yield this.regenerateSession();
         this.status = 400;
@@ -372,7 +377,7 @@ module.exports.updateRecord = function *() {
  */
 module.exports.pushCoords = function *() {
     // Check if session is valid
-    if (this.session.consentId !== getIpHash(this.request.ip)) {
+    if (this.session.consentId !== getSha1Hash(this.session.sessionId)) {
         yield this.regenerateSession();
         this.status = 400;
         this.body = 'Cannot find the session ID; make sure cookies are enabled';
