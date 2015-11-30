@@ -145,6 +145,7 @@ let validateTracker = function *(tracker) {
  * Sets the progress cookie to indicate the page being displayed.
  */
 module.exports.render = function *() {
+    yield this.regenerateSession();
     this.session.progress = 0;
 
     yield this.render('survey/start', {
@@ -259,7 +260,6 @@ module.exports.getNext = function *() {
         yield this.regenerateSession();
         this.status = 400;
     } else if (SEQ[nextProg].identifier === 'final') {
-        yield this.regenerateSession();
         this.body = {
             ok: true,
             contents: yield this.render('survey/' + SEQ[nextProg].template, { writeResp: false }),

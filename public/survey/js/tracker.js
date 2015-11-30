@@ -151,10 +151,11 @@ var createCanvas = function () {
 
     // If CTRL + ALT is pressed, show the mouse track
     $(window).keydown(function (e) {
+        this.shiftKeyDown = this.shiftKeyDown || (e.keyCode === 16);
         this.ctrlKeyDown = this.ctrlKeyDown || (e.keyCode === 17);
         this.altKeyDown = this.altKeyDown || (e.keyCode === 18);
 
-        if (this.ctrlKeyDown && this.altKeyDown) {
+        if (this.ctrlKeyDown && this.altKeyDown && this.shiftKeyDown) {
             $('#mousepaths').animate({
                 'opacity': '1'
             }, 150);
@@ -163,10 +164,11 @@ var createCanvas = function () {
 
     // If CTRL + ALT is released, hide the mouse track
     $(window).keyup(function (e) {
+        this.shiftKeyDown = (e.keyCode === 16)? false : this.shiftKeyDown;
         this.ctrlKeyDown = (e.keyCode === 17)? false : this.ctrlKeyDown;
         this.altKeyDown = (e.keyCode === 18)? false : this.altKeyDown;
 
-        if (!this.ctrlKeyDown || !this.altKeyDown) {
+        if (!this.ctrlKeyDown || !this.altKeyDown || !this.shiftKeyDown) {
             $('#mousepaths').animate({
                 'opacity': '0'
             }, 150);
