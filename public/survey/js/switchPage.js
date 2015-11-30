@@ -26,6 +26,7 @@ var navigationAdapter = function (url, success, fail) {
                 $('#contents').fadeOut(300, function () {
                     $('#contents').empty();
                     $('#contents').append(data.contents);
+                    window.scrollTo(0, 0);
                     $('#contents').fadeIn(300);
                     if (data.actionButtons === undefined) {
                         $('#prev').css('display', 'default');

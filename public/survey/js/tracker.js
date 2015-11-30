@@ -89,7 +89,9 @@ var resetTracker = function (objectId, curAnswer) {
  * @param   newAnswer   The new answer to finalise this tracker with
  */
 var finaliseTracker = function (newAnswer) {
-    if (_current && _current.questionId && newAnswer) {
+    newAnswer = newAnswer || '';
+    
+    if (_current && _current.questionId) {
         _current.answer.new = newAnswer;
         _current.endTime = (new Date()).getTime();
 

@@ -93,7 +93,8 @@ let getQuestions = function *() {
 let isReasonableTime = function (epoch) {
     let cur = Date.now();
     epoch = parseInt(epoch);
-    return (epoch < cur && epoch > cur - 5400000);
+    console.log('Now: ' + cur + ', Epoch: ' + epoch);
+    return (epoch <= cur + 3000 && epoch > cur - 5400000);
 }
 
 /**
@@ -207,6 +208,7 @@ module.exports.getPage = function *() {
             this.body = {
                 ok: true,
                 contents: yield this.render('survey/' + SEQ[index].template, { writeResp: false }),
+                actionButtons: (index === CONSENT_INDEX)? [ 'Consent', 'Go Back'] : undefined
             };
         }
     } else {
