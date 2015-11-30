@@ -17,7 +17,7 @@ module.exports = (function () {
         app.keys = [ config.appkey ];
 
         app.use(bodyParser());
-        app.use(session({ prefix: '_fts_survey_' }));
+        app.use(session({ prefix: '_fts_survey_', ttl: 60 * 60 * 1.5}));
         app.use(router.routes());
         app.use(serve('./public'));
 

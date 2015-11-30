@@ -54,7 +54,6 @@ var navigationAdapter = function (url, success, fail) {
 
                     // End of study
                     if (data.end) {
-                        console.log('ending stuffs');
                         var navItems = $('.navItem');
                         for (var i = 0; i < navItems.length - 1; i++) {
                             $(navItems[i]).delay(i * 30 + 350).slideUp(300, function () {
