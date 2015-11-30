@@ -74,7 +74,7 @@ var navigationAdapter = function (url, success, fail) {
         }).fail(function (data) {
             // Something fatal happend (server did not respond 2xx code)
             // Prompt user and refresh
-            showToast('Failed to get previous page; refreshing...');
+            showToast('Failed to get page; refreshing...');
             setTimeout(function () {
                 window.location.assign('/');
             }, 1000);

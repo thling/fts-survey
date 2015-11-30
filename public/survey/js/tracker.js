@@ -95,7 +95,7 @@ var finaliseTracker = function (newAnswer) {
 
         // Deep copy to avoid accidentally modifying
         // object during async ajax call
-        var tmp = {}
+        var tmp = {};
         $.extend(true, tmp, _current);
         submitTracker(tmp);
     }
