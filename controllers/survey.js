@@ -145,7 +145,7 @@ let validateTracker = function *(tracker) {
  * Sets the progress cookie to indicate the page being displayed.
  */
 module.exports.render = function *() {
-    // yield this.regenerateSession();
+    yield this.regenerateSession();
     this.session.progress = 0;
 
     yield this.render('survey/start', {
@@ -176,12 +176,17 @@ module.exports.getPage = function *() {
             if (!this.session.sessionId) {
                 // Create new answer session and assign the session an ID
                 let ans = new Answer({
-                    consentId: this.session.consentId,
                     trackers: []
                 });
 
                 yield ans.save();
                 this.session.sessionId = ans._id;
+
+                // Get a consentId
+                this.session.consentId = getSha1Hash(this.session.sessionId);
+                ans.consentId = this.session.consentId;
+                ans.markModified('consentId');
+                yield ans.save();
             }
 
             let qs = yield getQuestions();
@@ -240,14 +245,13 @@ module.exports.getNext = function *() {
 
             yield ans.save();
             this.session.sessionId = ans._id;
-        }
 
-        // Get a consentId
-        this.session.consentId = getSha1Hash(this.session.sessionId);
-        let ans = yield Answer.findOne({ _id: this.session.sessionId });
-        ans.consentId = this.session.consentId;
-        ans.markModified('consentId');
-        yield ans.save();
+            // Get a consentId
+            this.session.consentId = getSha1Hash(this.session.sessionId);
+            ans.consentId = this.session.consentId;
+            ans.markModified('consentId');
+            yield ans.save();
+        }
 
         // Render the questions
         let qs = yield getQuestions();
