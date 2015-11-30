@@ -313,6 +313,7 @@ module.exports.getPrev = function *() {
  */
 module.exports.updateRecord = function *() {
     if (this.session.consentId !== getIpHash(this.request.ip)) {
+        console.log(this.session);
         yield this.regenerateSession();
         this.status = 400;
         this.body = 'Please give consent to the consent form before proceeding';
