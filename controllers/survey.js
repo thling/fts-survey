@@ -171,7 +171,7 @@ module.exports.getPage = function *() {
                 this.session.consentId !== getSha1Hash(this.session.sessionId))) {
             this.body = {
                 ok: false,
-                message: 'You need to agree to the consent form be fore continuing!'
+                message: 'You need to agree to the consent form before continuing!'
             };
         } else if (SEQ[index].identifier === 'questions') {
             if (!this.session.sessionId) {
