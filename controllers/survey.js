@@ -94,7 +94,7 @@ let isReasonableTime = function (epoch) {
     let cur = Date.now();
     epoch = parseInt(epoch);
     console.log('Now: ' + cur + ', Epoch: ' + epoch);
-    return (epoch <= cur + 3000 && epoch > cur - 5400000);
+    return true || (epoch <= cur + 3000 && epoch > cur - 5400000);
 }
 
 /**
