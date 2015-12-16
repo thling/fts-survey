@@ -127,8 +127,6 @@ def JsonToCsv(args):
     for name, clf in zip(names, classifiers):
         print "running {classifier}".format(classifier=name)
         for kf_name, kf in zip(kf_names, folds):
-            if kf_name == "LeaveOneOut":
-                continue
             TP = 0
             TN = 0
             FP = 0
