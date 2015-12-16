@@ -18,7 +18,9 @@ from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.metrics import confusion_matrix
 from sklearn.cross_validation import StratifiedKFold, KFold, LeaveOneOut
 from sklearn.metrics import precision_recall_fscore_support as PRFS
+from sklearn import tree
 import numpy as np
+import os
 def generateFeature(args, eachUser):
     
     #eachUser = {'answer':[], 'questionId':[], 'endTime':[], 'mouse':[], 'startTime':[], 'Duration':[], 'move':[], 'label':True, 'totalMove':[]}
@@ -127,6 +129,7 @@ def JsonToCsv(args):
     for name, clf in zip(names, classifiers):
         print "running {classifier}".format(classifier=name)
         for kf_name, kf in zip(kf_names, folds):
+            
             TP = 0
             TN = 0
             FP = 0
@@ -172,10 +175,15 @@ def JsonToCsv(args):
                 fscore = 0
             #output_string = "{classifier},{fold},{accuracy},{precision},{recall},{fscore}".format(classifier = name, fold = kf_name, accuracy = accuracy, precision = precision, recall=recall, fscore = fscore)
             #print output_string
-            ret = {"classifier":name, "fold":kf_name, "accuracy":accuracy, "precision":precision, "recall":recall, "fscore":fscore}
+            ret = {"classifier":name, "fold":kf_name, "accuracy":accuracy, "precision":precision, "recall":recall, "fscore":fscore, "type1Error":FP/float(TP+TN+FP+FN), "type2Error":FN/float(TP+TN+FP+FN)}
             final_results.append(ret)
-            #print name, test_kf, "Accuracy:", (TP+TN)/float(len(data)), "\nPrecision:", TP/float(TP+FP), "\nRecall:", TP/float(TP+FN), "\nF-score:", (2*TP)/float(2*TP+FP+FN)
-    columns = ["classifier", "fold", "accuracy", "precision", "recall", "fscore"]
+            if "Decision Tree" in name:
+                tree.export_graphviz(clf, out_file=kf_name, feature_names=np.array(train_data.keys()))
+                command = "dot -Tpng {} -o {}.png".format(kf_name, kf_name)
+                os.system(command)
+                os.system("rm {}".format(kf_name))
+            
+    columns = ["classifier", "fold", "accuracy", "precision", "recall", "fscore", "type1Error","type2Error"]
     final_data = pandas.DataFrame(data=final_results)[columns]
     print final_data
     final_data.to_csv(args.output, index=False)
