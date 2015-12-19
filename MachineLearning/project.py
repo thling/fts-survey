@@ -13,8 +13,8 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+#from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+#from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.metrics import confusion_matrix
 from sklearn.cross_validation import StratifiedKFold, KFold, LeaveOneOut
 from sklearn.metrics import precision_recall_fscore_support as PRFS
@@ -122,8 +122,8 @@ def JsonToCsv(args):
     #LinearDiscriminantAnalysis(),
     #QuadraticDiscriminantAnalysis()
     ]
-    #names = ["Nearest Neighbors", "Linear SVM", "RBF SVM", "Decision Tree","Random Forest", "AdaBoost", "Naive Bayes", "Linear Discriminant Analysis","Quadratic Discriminant Analysis"]
     names = ["Nearest Neighbors", "Linear SVM", "RBF SVM", "Decision Tree","Random Forest", "AdaBoost", "Naive Bayes"]
+    #names = ["Naive Bayes"]
     kf_names = ["stratifiedKFold", "KFold", "LeaveOneOut"]
     folds = [StratifiedKFold(data['label'], n_folds=5, shuffle = True), KFold(len(data['label']), n_folds=5, shuffle = True), LeaveOneOut(len(data))]
     for name, clf in zip(names, classifiers):
@@ -183,9 +183,17 @@ def JsonToCsv(args):
                 os.system(command)
                 os.system("rm {}".format(kf_name))
             
+            if "Naive" in name:
+                theta = pandas.DataFrame(data = clf.theta_)
+                theta.columns = train_data.columns
+                theta.to_csv(kf_name+'_theta.csv', index=False)
+                sigma = pandas.DataFrame(data = clf.sigma_)
+                sigma.columns = train_data.columns
+                sigma.to_csv(kf_name+'_sigma.csv', index=False)
+            
     columns = ["classifier", "fold", "accuracy", "precision", "recall", "fscore", "type1Error","type2Error"]
     final_data = pandas.DataFrame(data=final_results)[columns]
-    print final_data
+    #print final_data
     final_data.to_csv(args.output, index=False)
     
 def main():
